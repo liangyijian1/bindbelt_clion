@@ -11,7 +11,7 @@ void utils::visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     while (!viewer.wasStopped())
     {
         viewer.spinOnce(100);
-        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+        std::this_thread::sleep_for(chrono::microseconds(100000));
     }
 }
 
@@ -27,7 +27,7 @@ void utils::visualize(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud)
     while (!viewer.wasStopped())
     {
         viewer.spinOnce(100);
-        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+        std::this_thread::sleep_for(chrono::microseconds(100000));
     }
 }
 
@@ -52,7 +52,7 @@ void utils::visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1, pcl::PointClou
     while (!viewer->wasStopped())
     {
         viewer->spinOnce(100);
-        boost::this_thread::sleep(boost::posix_time::microseconds(10000));
+        std::this_thread::sleep_for(chrono::microseconds(10000));
     }
 }
 

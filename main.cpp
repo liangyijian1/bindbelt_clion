@@ -6,7 +6,6 @@
 namespace _pcl
 {
     namespace fs = std::filesystem;
-    using namespace std;
 
     typedef pcl::PointXYZ PointT;
     typedef pcl::PointXYZRGBA PointTRGBA;
@@ -342,7 +341,7 @@ namespace _pcl
                                 double z = z_offset + z_resolution * data[Index];
                                 if (data[Index] != -32768)
                                 {
-                                    f1 << x << ' ' << 1 << ' ' << z << '\n';
+                                    f1 << x << ' ' << 0 << ' ' << z << '\n';
                                     f2 << x << ' ' << z << '\n';
                                     validPointCount++;
                                 }
@@ -373,6 +372,16 @@ namespace _pcl
     }
 
     void LMI_Process_line(){
+        //本地读取PCD
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        if (pcl::io::loadPCDFile(R"(C:\Users\22692\Downloads\profile_2d_1712815172.pcd)", *cloud) == -1) {
+            cout << "load failed" << '\n';
+        }
+        //欧式聚类
+        std::vector<pcl::PointIndices> cluster_indices;
+        utils::EuclideanCluster(cloud, cluster_indices);
+        //可视化聚类结果
+
 
     }
 }
@@ -380,7 +389,7 @@ namespace _pcl
 
 int main(int argc, char* argv[])
 {
-    _pcl::LMI_receive_line();
+    _pcl::LMI_Process_line();
 
     return 0;
 }
