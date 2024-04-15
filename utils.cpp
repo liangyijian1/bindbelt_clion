@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void utils::visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+void utils::visualize(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
     viewer.setBackgroundColor(0.0, 0.0, 0.0);
@@ -15,7 +15,7 @@ void utils::visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     }
 }
 
-void utils::visualize(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud)
+void utils::visualize(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud)
 {
     pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
     viewer.setBackgroundColor(255.0, 255.0, 255.0);
@@ -31,7 +31,7 @@ void utils::visualize(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud)
     }
 }
 
-void utils::visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2)
+void utils::visualize(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud1, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2)
 {
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("cloud show"));
     int v1 = 0;
@@ -96,7 +96,7 @@ bool utils::loadPCDFile(const std::string& filename, pcl::PointCloud<pcl::PointX
     return (true);
 }
 
-Eigen::VectorXf utils::fit_plane(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<int>& inliers, double th)
+Eigen::VectorXf utils::fit_plane(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<int>& inliers, double th)
 {
     pcl::SampleConsensusModelPlane<pcl::PointXYZ>::Ptr model_plane(new pcl::SampleConsensusModelPlane<pcl::PointXYZ>(cloud));
     pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_plane);
@@ -110,7 +110,7 @@ Eigen::VectorXf utils::fit_plane(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
     return coef;
 }
 
-void utils::fit_plane_perpendicular(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud)
+void utils::fit_plane_perpendicular(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud)
 {
     double degree = 90.0;
     pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZRGBA>::Ptr model(
@@ -136,7 +136,7 @@ void utils::fit_plane_perpendicular(const pcl::PointCloud<pcl::PointXYZRGBA>::Pt
     pcl::io::savePCDFileBinary("./point_soft_16_13_17_855_bindbelt_SAC.pcd", *show1);
 }
 
-void utils::passthrough(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+void utils::passthrough(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
                         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, std::string axis, float min, float max,
                         bool negative = true)
 {
@@ -148,7 +148,7 @@ void utils::passthrough(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
     pass.filter(*cloud_filtered);
 }
 
-void utils::passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, float min, float max,
+void utils::passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, const std::string& axis, float min, float max,
                         bool negative)
 {
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -159,7 +159,7 @@ void utils::passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string a
     pass.filter(*cloud);
 }
 
-void utils::radiustfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, float radius, int min_neighbors)
+void utils::radiustfilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_filtered, float radius, int min_neighbors)
 {
     pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
     outrem.setInputCloud(cloud_filtered);
@@ -168,14 +168,53 @@ void utils::radiustfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, fl
     outrem.filter(*cloud_filtered);
 }
 
-void utils::EuclideanCluster(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<pcl::PointIndices> &cluster_indices)
+void utils::EuclideanCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<pcl::PointIndices> &cluster_indices, bool is_visualize)
 {
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud(cloud);
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(5);
-    ec.setMinClusterSize(100);
+    ec.setClusterTolerance(3);
+    ec.setMinClusterSize(2);
     ec.setSearchMethod(tree);
     ec.setInputCloud(cloud);
     ec.extract(cluster_indices);
+
+
+    if (!is_visualize){
+        //将cloud转换为PointXYZRGB
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb(new pcl::PointCloud<pcl::PointXYZRGB>);
+        pcl::copyPointCloud(*cloud, *cloud_rgb);
+        pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
+
+        for (const auto& single_clusters : cluster_indices){
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+            for (auto point : single_clusters.indices){
+
+                cloud_cluster->push_back((*cloud_rgb)[point]);
+            }
+            auto R = rand() % 255;
+            auto G = rand() % 255;
+            auto B = rand() % 255;
+
+            pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> single_color(cloud_cluster, R, G, B);
+            viewer.addPointCloud(cloud_cluster, single_color, "cloud_cluster" + std::to_string(R) + std::to_string(G) + std::to_string(B));
+        }
+
+        while (!viewer.wasStopped())
+        {
+            viewer.spinOnce(100);
+            std::this_thread::sleep_for(chrono::microseconds(100000));
+        }
+    }
+}
+
+void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<int> &inliers, double th) {
+    pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_line(new pcl::SampleConsensusModelLine<pcl::PointXYZ>(cloud));
+    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_line);
+    ransac.setDistanceThreshold(th);
+    ransac.setMaxIterations(200);
+    ransac.setProbability(0.99);
+    ransac.computeModel();
+    ransac.getInliers(inliers);
 }

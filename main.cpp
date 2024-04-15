@@ -23,9 +23,7 @@ namespace _pcl
         utils::passthrough(cloud, tmp_cloud, "x", -80, 50, false); //边缘裁剪
         //utils::passthrough(tmp_cloud, "y", -150, 150, false);
         //utils::passthrough(tmp_cloud, "z", 11, 270, false);
-        pcl::io::savePCDFile(R"(C:\Users\10458\Downloads\surface1.pcd)", *tmp_cloud);
-
-        //return true;
+        //pcl::io::savePCDFile(R"(C:\Users\10458\Downloads\surface1.pcd)", *tmp_cloud);
 
         pcl::PointIndices::Ptr nan_indices(new pcl::PointIndices);
         for (size_t i = 0; i < tmp_cloud->points.size(); ++i)
@@ -35,9 +33,6 @@ namespace _pcl
                 nan_indices->indices.push_back(i);
             }
         }
-
-        //utils::visualize(cloud, tmp_cloud);
-        //utils::radiustfilter(cloud, 5, 10);
 
         int th = 10;
         pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -371,25 +366,60 @@ namespace _pcl
 
     }
 
-    void LMI_Process_line(){
-        //本地读取PCD
+    void LMI_Process_line(vector<int>& line)
+    {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filter(new pcl::PointCloud<pcl::PointXYZ>);
         if (pcl::io::loadPCDFile(R"(C:\Users\22692\Downloads\profile_2d_1712815172.pcd)", *cloud) == -1) {
             cout << "load failed" << '\n';
         }
-        //欧式聚类
-        std::vector<pcl::PointIndices> cluster_indices;
-        utils::EuclideanCluster(cloud, cluster_indices);
-        //可视化聚类结果
+        // 去除(0,0,0)
+        pcl::PointIndices::Ptr nan_indices(new pcl::PointIndices);
+        for (size_t i = 0; i < cloud->points.size(); ++i)
+        {
+            if (cloud->points[i].x == 0 && cloud->points[i].y == 0 && cloud->points[i].z == 0)
+            {
+                nan_indices->indices.push_back(static_cast<int>(i));
+            }
+        }
+        pcl::ExtractIndices<pcl::PointXYZ> extract;
+        extract.setInputCloud(cloud);
+        extract.setIndices(nan_indices);
+        extract.setNegative(true);
+        extract.filter(*cloud_filter);
+        // 一次拟合
+        utils::fit_line(cloud_filter, line, 4);
+        // 去除拟合直线上的点
+        pcl::PointIndices::Ptr line_indices(new pcl::PointIndices);
+        line_indices->indices = line;
+        extract.setInputCloud(cloud_filter);
+        extract.setNegative(false);
+        extract.setIndices(line_indices);
+        extract.filter(*cloud_filter);
 
+        // 二次拟合
+        line.clear();
+        line_indices->indices.clear();
+        utils::fit_line(cloud_filter, line, 4);
+        line_indices->indices = line;
+        extract.setInputCloud(cloud_filter);
+        extract.setNegative(false);
+        extract.setIndices(line_indices);
+        extract.filter(*cloud_filter);
+
+        // 可视化
+        utils::visualize(cloud, cloud_filter);
 
     }
+
+
 }
 
 
 int main(int argc, char* argv[])
 {
-    _pcl::LMI_Process_line();
+    vector<int> line;
+    _pcl::LMI_Process_line(line);
 
     return 0;
 }

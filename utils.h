@@ -30,18 +30,19 @@ using namespace std;
 class utils
 {
 public:
-    utils() {};
-    ~utils() {};
-    static void visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-    static void visualize(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud);
-    static void visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2);
+    utils() = default;
+    ~utils() = default;
+    static void visualize(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    static void visualize(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud);
+    static void visualize(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud1, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2);
 
     static bool loadPCDFile(const std::string& filename, pcl::PointCloud<pcl::PointXYZ>, const std::string& savepath);
-    static Eigen::VectorXf fit_plane(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<int>& inliers, double th);
-    static void fit_plane_perpendicular(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud);
-    static void passthrough(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, std::string axis, float min, float max, bool negative);
-    static void passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, float min, float max, bool negative);
-    static void radiustfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, float radius, int min_neighbors);
-    static void EuclideanCluster(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<pcl::PointIndices> &cluster_indices);
+    static Eigen::VectorXf fit_plane(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<int>& inliers, double th);
+    static void fit_plane_perpendicular(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud);
+    static void fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<int>& inliers, double th);
+    static void passthrough(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, std::string axis, float min, float max, bool negative);
+    static void passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, const std::string& axis, float min, float max, bool negative);
+    static void radiustfilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_filtered, float radius, int min_neighbors);
+    static void EuclideanCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<pcl::PointIndices> &cluster_indices, bool is_visualize = false);
 
 };
