@@ -21,6 +21,8 @@ link_directories("C:/Users/22692/Downloads/14400-6.1.32.12_SOFTWARE_GO_SDK/GO_SD
 add_executable(bindbelt_clion main.cpp
         utils.cpp
         utils.h
+        LMI.cpp
+        LMI.h
 )
 target_link_libraries (bindbelt_clion ${PCL_LIBRARIES})
 target_link_libraries(bindbelt_clion ${LMI_LIB_FILES})

@@ -370,41 +370,43 @@ namespace _pcl
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filter(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr line1(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr line2(new pcl::PointCloud<pcl::PointXYZ>);
         if (pcl::io::loadPCDFile(R"(C:\Users\22692\Downloads\profile_2d_1712815172.pcd)", *cloud) == -1) {
             cout << "load failed" << '\n';
         }
         // 去除(0,0,0)
-        pcl::PointIndices::Ptr nan_indices(new pcl::PointIndices);
+        pcl::PointIndices::Ptr indices(new pcl::PointIndices);
         for (size_t i = 0; i < cloud->points.size(); ++i)
         {
             if (cloud->points[i].x == 0 && cloud->points[i].y == 0 && cloud->points[i].z == 0)
             {
-                nan_indices->indices.push_back(static_cast<int>(i));
+                indices->indices.push_back(static_cast<int>(i));
             }
         }
         pcl::ExtractIndices<pcl::PointXYZ> extract;
         extract.setInputCloud(cloud);
-        extract.setIndices(nan_indices);
+        extract.setIndices(indices);
         extract.setNegative(true);
         extract.filter(*cloud_filter);
         // 一次拟合
-        utils::fit_line(cloud_filter, line, 4);
+        indices->indices.clear();
+        utils::fit_line(cloud_filter, line, 10);
         // 去除拟合直线上的点
-        pcl::PointIndices::Ptr line_indices(new pcl::PointIndices);
-        line_indices->indices = line;
+        indices->indices = line;
         extract.setInputCloud(cloud_filter);
         extract.setNegative(false);
-        extract.setIndices(line_indices);
-        extract.filter(*cloud_filter);
-
+        extract.setIndices(indices);
+        extract.filter(*line1);
+        utils::visualize(cloud_filter, line1);
         // 二次拟合
         line.clear();
-        line_indices->indices.clear();
+        indices->indices.clear();
         utils::fit_line(cloud_filter, line, 4);
-        line_indices->indices = line;
+        indices->indices = line;
         extract.setInputCloud(cloud_filter);
         extract.setNegative(false);
-        extract.setIndices(line_indices);
+        extract.setIndices(indices);
         extract.filter(*cloud_filter);
 
         // 可视化
