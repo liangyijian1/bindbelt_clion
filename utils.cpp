@@ -159,7 +159,7 @@ void utils::passthrough(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, const std::st
     pass.filter(*cloud);
 }
 
-void utils::radiustfilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_filtered, float radius, int min_neighbors)
+void utils::radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, float radius, int min_neighbors)
 {
     pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
     outrem.setInputCloud(cloud_filtered);
@@ -209,7 +209,7 @@ void utils::EuclideanCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, s
     }
 }
 
-void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<int> &inliers, double th) {
+void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<int> &inliers, Eigen::VectorXf &model_coefficients, double th) {
     pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_line(new pcl::SampleConsensusModelLine<pcl::PointXYZ>(cloud));
     pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_line);
     ransac.setDistanceThreshold(th);
@@ -217,4 +217,36 @@ void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<in
     ransac.setProbability(0.99);
     ransac.computeModel();
     ransac.getInliers(inliers);
+    ransac.getModelCoefficients(model_coefficients);
+}
+
+void utils::remove_3zero(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered) {
+    pcl::PointIndices::Ptr indices(new pcl::PointIndices);
+    for (size_t i = 0; i < cloud->points.size(); ++i)
+    {
+        if (cloud->points[i].x == 0 && cloud->points[i].y == 0 && cloud->points[i].z == 0)
+        {
+            indices->indices.push_back(static_cast<int>(i));
+        }
+    }
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud(cloud);
+    extract.setIndices(indices);
+    extract.setNegative(true);
+    extract.filter(*cloud_filtered);
+}
+
+void utils::cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point) {
+    //计算点云中的点到直线的距离
+    double a = coefficients[0];
+    double b = coefficients[1];
+    double c = coefficients[2];
+    double d = coefficients[3];
+    double e = coefficients[4];
+    double f = coefficients[5];
+    double x0 = point.x;
+    double y0 = point.y;
+    double z0 = point.z;
+    double dis = abs(a * x0 + b * y0 + c * z0 + d) / sqrt(a * a + b * b + c * c);
+
 }

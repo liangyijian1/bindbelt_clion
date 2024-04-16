@@ -5,14 +5,12 @@
 #ifndef BINDBELT_CLION_LMI_H
 #define BINDBELT_CLION_LMI_H
 
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-
+#include "utils.h"
 
 class LMI {
 
 public:
-    static void process_line(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    static void process_line();
 
 };
 
