@@ -213,7 +213,7 @@ void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<in
     pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_line(new pcl::SampleConsensusModelLine<pcl::PointXYZ>(cloud));
     pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_line);
     ransac.setDistanceThreshold(th);
-    ransac.setMaxIterations(200);
+    ransac.setMaxIterations(500);
     ransac.setProbability(0.99);
     ransac.computeModel();
     ransac.getInliers(inliers);
@@ -236,7 +236,7 @@ void utils::remove_3zero(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::
     extract.filter(*cloud_filtered);
 }
 
-void utils::cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point) {
+double utils::cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point) {
     //计算点云中的点到直线的距离
     double a = coefficients[0];
     double b = coefficients[1];
@@ -247,6 +247,6 @@ void utils::cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point) {
     double x0 = point.x;
     double y0 = point.y;
     double z0 = point.z;
-    double dis = abs(a * x0 + b * y0 + c * z0 + d) / sqrt(a * a + b * b + c * c);
+    return abs(a * x0 + b * y0 + c * z0 + d) / sqrt(a * a + b * b + c * c);
 
 }

@@ -10,7 +10,18 @@
 class LMI {
 
 public:
-    static void process_line();
+    LMI();
+    void process_line();
+
+private:
+    kAssembly api;
+    kStatus status;
+    GoSystem system;
+    GoSensor sensor;
+    GoSetup setup;
+    GoDataSet dataset;
+    GoDataMsg data_obj;
+    kIpAddress ip_address{};
 
 };
 

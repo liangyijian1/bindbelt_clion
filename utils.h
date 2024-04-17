@@ -45,5 +45,5 @@ public:
     static void radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered, float radius, int min_neighbors);
     static void EuclideanCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, std::vector<pcl::PointIndices> &cluster_indices, bool is_visualize = false);
     static void remove_3zero(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered);
-    static void cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point);
+    static double cal_dis(Eigen::VectorXf coefficients, pcl::PointXYZ point);
 };
