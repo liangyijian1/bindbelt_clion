@@ -60,11 +60,7 @@ void LMI::process_line() {
         pcl::PointCloud<pcl::PointXYZ>::Ptr line1(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr line2(new pcl::PointCloud<pcl::PointXYZ>);
         utils::passthrough(cloud, cloud_filter1, "z", 100, 1000, false);
-        //utils::visualize(cloud, cloud_filter1);
 
-//        if (pcl::io::loadPCDFile(R"(C:\Users\22692\Downloads\profile_2d_1712815172.pcd)", *cloud) == -1) {
-//            cout << "load failed" << '\n';
-//        }
         utils::remove_3zero(cloud_filter1, cloud_filter);
         utils::radius_filter(cloud_filter, 15, 8);
         //utils::visualize(cloud, cloud_filter);
@@ -103,6 +99,7 @@ void LMI::process_line() {
         "Box Status: " << (max_value > 150 && dis.size() > 10 ? "NG" : "OK") << '\n';
         // 可视化
         utils::visualize(cloud, line2);
+
     }
 
 }
@@ -150,4 +147,17 @@ LMI::LMI() {
         printf("Error: GoSystem_Start:%d\n", status);
         return;
     }
+}
+
+LMI::~LMI() {
+    cout << "destroying..." << '\n';
+    if ((status = GoSystem_Stop(system)) != kOK)
+    {
+        printf("Error: GoSystem_Stop:%d\n", status);
+        return;
+    }
+    GoDestroy(dataset);
+    GoDestroy(sensor);
+    //GoDestroy(system);
+    GoDestroy(api);
 }

@@ -13,6 +13,7 @@ class LMI {
 
 public:
     LMI();
+    ~LMI();
     void process_line();
 
 private:
