@@ -6,6 +6,8 @@
 #define BINDBELT_CLION_LMI_H
 
 #include "utils.h"
+#include <GoSdk/GoSdk.h>
+#include <kApi/kApi.h>
 
 class LMI {
 

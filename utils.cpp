@@ -213,7 +213,7 @@ void utils::fit_line(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, vector<in
     pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_line(new pcl::SampleConsensusModelLine<pcl::PointXYZ>(cloud));
     pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_line);
     ransac.setDistanceThreshold(th);
-    ransac.setMaxIterations(500);
+    ransac.setMaxIterations(200);
     ransac.setProbability(0.99);
     ransac.computeModel();
     ransac.getInliers(inliers);
